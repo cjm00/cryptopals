@@ -1,0 +1,8 @@
+[package]
+name = "challenge2"
+version = "0.1.0"
+authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
+
+[dependencies]
+rustc-serialize = "0.3"
+cryptobuddy = {path = "../../cryptobuddy/"}

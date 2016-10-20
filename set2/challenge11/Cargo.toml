@@ -1,0 +1,7 @@
+[package]
+name = "challenge11"
+version = "0.1.0"
+authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
+
+[dependencies]
+cryptobuddy = {path = "../../cryptobuddy/"}

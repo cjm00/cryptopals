@@ -1,0 +1,9 @@
+[package]
+name = "cryptobuddy"
+version = "0.1.0"
+authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
+build = "build.rs"
+
+[dependencies]
+openssl = "0.8.3"
+rand = "0.3"
