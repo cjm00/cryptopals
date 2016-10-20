@@ -11,7 +11,7 @@ pub mod utils;
 mod utils_tests {
     use utils;
     #[test]
-    fn hamming_distance_test(){
+    fn hamming_distance_test() {
         let a: Vec<u8> = "this is a test".into();
         let b: Vec<u8> = "wokka wokka!!!".into();
         assert_eq!(37, utils::hamming_distance(&a, &b))

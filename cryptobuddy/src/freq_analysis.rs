@@ -5,22 +5,21 @@ use std::ascii::AsciiExt;
 
 const TABLE_LENGTH: usize = 27;
 
-static ENG_FREQ: [f64; TABLE_LENGTH] = [
-    0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,  // A-G
-    0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749,  // H-N
-    0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,  // O-U
-    0.00978, 0.02360, 0.00150, 0.01974, 0.00074, 0.1                // V-Z, whitespace
-];
+static ENG_FREQ: [f64; TABLE_LENGTH] =
+    [0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015 /* A-G */, 0.06094, 0.06966,
+     0.00153, 0.00772, 0.04025, 0.02406, 0.06749 /* H-N */, 0.07507, 0.01929, 0.00095, 0.05987,
+     0.06327, 0.09056, 0.02758 /* O-U */, 0.00978, 0.02360, 0.00150, 0.01974, 0.00074,
+     0.1 /* V-Z, whitespace */];
 
 
 #[derive(Debug)]
 pub struct CharacterCounter {
-    chars: [usize; 27]
+    chars: [usize; 27],
 }
 
 impl CharacterCounter {
-    pub fn from<I: Iterator<Item=char>>(x: I) -> CharacterCounter {
-        let mut out = CharacterCounter {chars: [0usize; TABLE_LENGTH]};
+    pub fn from<I: Iterator<Item = char>>(x: I) -> CharacterCounter {
+        let mut out = CharacterCounter { chars: [0usize; TABLE_LENGTH] };
         for item in x {
             match item {
                 'a' | 'A' => out.chars[0] += 1,
@@ -49,7 +48,7 @@ impl CharacterCounter {
                 'x' | 'X' => out.chars[23] += 1,
                 'y' | 'Y' => out.chars[24] += 1,
                 'z' | 'Z' => out.chars[25] += 1,
-                _ => out.chars[26] += 1
+                _ => out.chars[26] += 1,
             }
         }
 
@@ -69,12 +68,15 @@ impl CharacterCounter {
 #[derive(Debug)]
 pub struct CharacterFreq {
     char_freqs: [f64; TABLE_LENGTH],
-    cardinality: usize
+    cardinality: usize,
 }
 
 impl CharacterFreq {
     pub fn from_count(x: CharacterCounter) -> CharacterFreq {
-        let mut out = CharacterFreq{char_freqs: [0f64; TABLE_LENGTH], cardinality: x.total()};
+        let mut out = CharacterFreq {
+            char_freqs: [0f64; TABLE_LENGTH],
+            cardinality: x.total(),
+        };
         let char_count = x.total();
         assert!(char_count != 0);
         for k in 0..TABLE_LENGTH {
@@ -95,22 +97,23 @@ impl CharacterFreq {
 }
 
 fn chi_squared_eval(s: &str) -> f64 {
-    if !s.is_ascii() {return f64::INFINITY}
+    if !s.is_ascii() {
+        return f64::INFINITY;
+    }
     let counts = CharacterCounter::from(s.chars());
     let freqs = CharacterFreq::from_count(counts);
     freqs.chi_squared_test()
 }
 
 pub fn text_score(input: &[u8]) -> f64 {
-    if input.iter().any(|&x| ((x < 32) &&
-                              (x as char) != '\t'      &&
-                              (x as char) != '\n')     ||
-                              (x >= 127)
-                       ) {return f64::INFINITY}
+    if input.iter()
+        .any(|&x| ((x < 32) && (x as char) != '\t' && (x as char) != '\n') || (x >= 127)) {
+        return f64::INFINITY;
+    }
 
-    match str::from_utf8(input){
-        Err(_) => {f64::INFINITY},
-        Ok(s) => {chi_squared_eval(s)}
+    match str::from_utf8(input) {
+        Err(_) => f64::INFINITY,
+        Ok(s) => chi_squared_eval(s),
     }
 
 }
