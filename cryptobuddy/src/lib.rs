@@ -1,3 +1,7 @@
+#![feature(plugin)]
+
+#![plugin(clippy)]
+
 extern crate openssl;
 extern crate rand;
 
@@ -5,6 +9,7 @@ extern crate rand;
 pub mod freq_analysis;
 pub mod crypto;
 pub mod utils;
+
 
 
 #[cfg(test)]

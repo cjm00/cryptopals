@@ -5,3 +5,4 @@ authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 
 [dependencies]
 cryptobuddy = {path = "../../cryptobuddy/"}
+rand = "0.3"

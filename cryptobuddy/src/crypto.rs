@@ -7,11 +7,10 @@ use std::iter;
 
 pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     debug_assert_eq!(a.len(), b.len());
-    let out: Vec<u8> = a.iter()
+    a.iter()
         .zip(b.iter())
         .map(|(x, y)| x ^ y)
-        .collect();
-    out
+        .collect()
 }
 
 pub fn single_byte_xor(stream: &[u8], key: u8) -> Vec<u8> {
@@ -20,16 +19,14 @@ pub fn single_byte_xor(stream: &[u8], key: u8) -> Vec<u8> {
 }
 
 pub fn repeating_key_xor(stream: &[u8], key: &[u8]) -> Vec<u8> {
-    let key_stream: Vec<u8> = key.iter().cycle().take(stream.len()).map(|&x| x).collect();
+    let key_stream: Vec<u8> = key.iter().cloned().cycle().take(stream.len()).collect();
     fixed_xor(&stream, &key_stream)
 }
 
 pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
     for (index, block) in stream.chunks(block_size).enumerate() {
-        for sub_block in stream.chunks(block_size).skip(index + 1) {
-            if block == sub_block {
-                return true;
-            }
+        if stream.chunks(block_size).skip(index + 1).any(|z| z == block) {
+            return true;
         }
     }
     false
@@ -37,19 +34,17 @@ pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
 
 pub fn pkcs7_pad(block: &[u8], block_size: usize) -> Vec<u8> {
     if (block.len() % block_size) == 0 {
-        let output: Vec<u8> = block.iter()
+        block.iter()
             .cloned()
             .chain(iter::repeat(block_size as u8).take(block_size))
-            .collect();
-        return output;
+            .collect()
     } else {
         let residue: u8 = (block.len() % block_size) as u8;
-        let output: Vec<u8> = block.iter()
+        block.iter()
             .cloned()
             .chain(iter::repeat(block_size as u8 - residue).take(block_size - residue as usize))
-            .collect();
+            .collect()
 
-        return output;
     }
 }
 
@@ -88,8 +83,7 @@ fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
         .unwrap();
     crypter.pad(false);
     crypter.update(&data, &mut output).expect("Encrypted Successfully");
-    let output: Vec<u8> = output.iter().cloned().take(16).collect();
-    output
+    output.iter().cloned().take(16).collect()
 }
 
 pub fn aes_cbc_encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
@@ -127,9 +121,9 @@ pub fn check_pkcs7_pad_size(data: &[u8]) -> Option<usize> {
                 .rev()
                 .take(16)
                 .all(|z| z == 0) {
-                return Some(16);
+                Some(16)
             } else {
-                return None;
+                None
             }
         }
 
@@ -139,9 +133,9 @@ pub fn check_pkcs7_pad_size(data: &[u8]) -> Option<usize> {
                 .rev()
                 .take(u as usize)
                 .all(|z| z == u) {
-                return Some(u as usize);
+                Some(u as usize)
             } else {
-                return None;
+                None
             }
         }
     }

@@ -1,8 +1,9 @@
 extern crate cryptobuddy;
+extern crate rand;
 
-use cryptobuddy::utils;
+use cryptobuddy::{utils, crypto};
 
 fn main() {
-    let test_data = utils::random_key();
+    let test_data: bool = rand::random();
     println!("{:?}", test_data);
 }
