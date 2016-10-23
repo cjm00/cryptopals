@@ -127,7 +127,7 @@ pub fn check_pkcs7_pad_size(data: &[u8]) -> Option<usize> {
             }
         }
 
-        u @ _ => {
+        u => {
             if data.iter()
                 .cloned()
                 .rev()

@@ -16,8 +16,7 @@ fn load_data () -> Vec<u8> {
     let mut f = File::open("data/6.txt").expect("Couldn't open file");
     let mut s = String::new();
     f.read_to_string(&mut s).expect("File didn't go so well.");
-    let s = s.from_base64().unwrap();
-    s
+    s.from_base64().unwrap()
 }
 
 fn split_and_ham(x: &[u8]) -> f64 {
@@ -28,7 +27,7 @@ fn split_and_ham(x: &[u8]) -> f64 {
 fn key_size_likelihood (input: &[u8], key_size: usize) -> f64 {
     const NUM_SAMPLES: usize = 16;
     let batch_scores: Vec<f64> = input.chunks(key_size * 2)
-                                      .map( |x| split_and_ham(x))
+                                      .map(split_and_ham)
                                       .take(NUM_SAMPLES)
                                       .collect();
     batch_scores.iter().fold(0f64, |acc, x| acc + x) / batch_scores.len() as f64
@@ -44,8 +43,7 @@ fn estimate_key_size(data: &[u8]) -> usize{
     }
 
     key_weights.sort_by_key(|k| k.1);
-    let key: usize = key_weights.iter().map( |&(i, _)| i).nth(0).unwrap();
-    key
+    key_weights.iter().map( |&(i, _)| i).nth(0).unwrap()
 }
 
 fn safe_get<T: Copy>(slice: &[T], index: usize) -> Option<T> {
@@ -82,7 +80,7 @@ fn main() {
 
 
     let test_blocks = transpose_blocks(&data, potential_key_size);
-    let mut key: Vec<u8> = vec![];
+    let mut key = Vec::<u8>::new();
 
     for block in test_blocks {
         key.push(find_single_byte_key(&block));

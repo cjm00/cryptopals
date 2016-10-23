@@ -18,6 +18,5 @@ pub fn normalized_hamming_distance(a: &[u8], b: &[u8]) -> f64 {
 }
 
 pub fn random_key() -> [u8; 16] {
-    let output: [u8; 16] = rand::random();
-    output
+    rand::random()
 }
