@@ -18,7 +18,7 @@ pub struct CharacterCounter {
 }
 
 impl CharacterCounter {
-    pub fn from<I: Iterator<Item = char>>(x: I) -> CharacterCounter {
+    pub fn from<I: Iterator<Item = char>> (x: I) -> CharacterCounter {
         let mut out = CharacterCounter { chars: [0usize; TABLE_LENGTH] };
         for item in x {
             match item {
@@ -57,7 +57,7 @@ impl CharacterCounter {
 
     pub fn total(&self) -> usize {
         let mut out = 0usize;
-        for k in self.chars.iter() {
+        for k in &self.chars {
             out += *k;
         }
 
