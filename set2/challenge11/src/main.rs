@@ -16,19 +16,28 @@ fn load_data () -> Vec<u8> {
 
 fn pick_random_encryption_mode() -> EncryptionMode {
     let mode: bool = rand::random();
-
     match mode {
         true => EncryptionMode::CBC,
         false => EncryptionMode::ECB
     }
 }
 
-fn encrypt_under_random_key(data: &[u8]) -> () {
+fn encrypt_under_random_key(data: &[u8]) -> (EncryptionMode, Vec<u8>) {
     let mode = pick_random_encryption_mode();
+    let key = utils::random_key();
+    let iv = utils::random_key();
+    let data = utils::pad_both_sides(data);
+
+    match mode {
+        EncryptionMode::ECB => {(mode, crypto::aes_ecb_encrypt(&data, &key))},
+        EncryptionMode::CBC => {(mode, crypto::aes_cbc_encrypt(&data, &key, &iv))}
+    }
 }
 
 fn main() {
     let plaintext = load_data();
-    let test_data = utils::pad_both_sides(&plaintext);
-    println!("Done.");
+    let (mode, encrypted_data) = encrypt_under_random_key(&plaintext);
+    let guess = crypto::ecb_oracle(&encrypted_data);
+    if mode == guess {println!("Guessed correctly: {:?}", mode);}
+    else {println!("Guessed incorrectly: {:?} Actually: {:?}", guess, mode);}
 }

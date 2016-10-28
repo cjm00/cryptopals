@@ -4,6 +4,7 @@ use rust_crypto::{buffer, aes, blockmodes};
 use rust_crypto::buffer::{ ReadBuffer, WriteBuffer};
 use std::iter;
 
+#[derive(Debug, PartialEq)]
 pub enum EncryptionMode {
     ECB,
     CBC
@@ -161,6 +162,9 @@ pub fn trim_padding(data: &mut Vec<u8>) -> () {
 
 }
 
-pub fn ecb_oracle(data: &[u8]) -> bool {
-    detect_repeated_blocks(data, 16)
+pub fn ecb_oracle(data: &[u8]) -> EncryptionMode {
+    match detect_repeated_blocks(data, 16) {
+        true => EncryptionMode::ECB,
+        false => EncryptionMode::CBC
+    }
 }
