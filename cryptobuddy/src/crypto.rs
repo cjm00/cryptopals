@@ -1,11 +1,12 @@
-extern crate openssl;
+extern crate crypto as rust_crypto;
 
-use openssl::crypto::symm;
+use rust_crypto::{buffer, aes, blockmodes};
+use rust_crypto::buffer::{ ReadBuffer, WriteBuffer};
 use std::iter;
 
 pub enum EncryptionMode {
     ECB,
-    CBC,
+    CBC
 }
 
 pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
@@ -62,12 +63,15 @@ pub fn aes_ecb_decrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
 }
 
 fn aes_ecb_decrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
-    let mut output = [0u8; 32];
-    let mut crypter = symm::Crypter::new(symm::Type::AES_128_ECB, symm::Mode::Decrypt, key, None)
-        .unwrap();
-    crypter.pad(false);
-    crypter.update(data, &mut output).expect("Encrypted Successfully");
-    output.iter().cloned().take(16).collect()
+    let mut read_buffer = buffer::RefReadBuffer::new(data);
+    let mut buf = [0u8; 16];
+    let mut write_buffer = buffer::RefWriteBuffer::new(&mut buf);
+    let mut encrypter = aes::ecb_decryptor(aes::KeySize::KeySize128, key, blockmodes::NoPadding);
+    encrypter.decrypt(&mut read_buffer, &mut write_buffer, true).expect("Decryption unsucessful");
+
+    let mut output = Vec::<u8>::new();
+    output.extend(write_buffer.take_read_buffer().take_remaining().iter().cloned());
+    output
 }
 
 
@@ -81,12 +85,15 @@ pub fn aes_ecb_encrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
 }
 
 fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
-    let mut output = [0u8; 32];
-    let mut crypter = symm::Crypter::new(symm::Type::AES_128_ECB, symm::Mode::Encrypt, key, None)
-        .unwrap();
-    crypter.pad(false);
-    crypter.update(data, &mut output).expect("Encrypted Successfully");
-    output.iter().cloned().take(16).collect()
+    let mut read_buffer = buffer::RefReadBuffer::new(data);
+    let mut buf = [0u8; 16];
+    let mut write_buffer = buffer::RefWriteBuffer::new(&mut buf);
+    let mut encrypter = aes::ecb_encryptor(aes::KeySize::KeySize128, key, blockmodes::NoPadding);
+    encrypter.encrypt(&mut read_buffer, &mut write_buffer, true).expect("Encryption unsucessful");
+
+    let mut output = Vec::<u8>::new();
+    output.extend(write_buffer.take_read_buffer().take_remaining().iter().cloned());
+    output
 }
 
 pub fn aes_cbc_encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {

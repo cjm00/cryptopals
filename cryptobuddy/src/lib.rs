@@ -1,8 +1,4 @@
-#![feature(plugin)]
-
-#![plugin(clippy)]
-
-extern crate openssl;
+extern crate crypto as rust_crypto;
 extern crate rand;
 
 

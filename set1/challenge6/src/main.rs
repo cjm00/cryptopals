@@ -73,7 +73,6 @@ fn main() {
     let data = load_data();
     let potential_key_size = estimate_key_size(&data);
 
-
     let test_blocks = transpose_blocks(&data, potential_key_size);
     let mut key = Vec::<u8>::new();
 
