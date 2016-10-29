@@ -129,10 +129,12 @@ fn decrypt_byte(byte: usize, known: &[u8], secret: &SecretBlob, block_size: usiz
         let prefix: Vec<u8> = iter::repeat(b'A').take(pad_size).collect();
         let encrypted_block: Vec<u8> =
             secret.encrypt_with_prefix(&prefix).iter().cloned().take(16).collect();
+
         match reverse_block_lookup.get(&encrypted_block) {
             Some(x) => *x,
             None => unreachable!(),
         }
+
     } else {
         for x in 0..128u8 {
             let test_block: Vec<u8> =
@@ -154,6 +156,7 @@ fn decrypt_byte(byte: usize, known: &[u8], secret: &SecretBlob, block_size: usiz
             .nth(block_number)
             .unwrap()
             .into();
+            
         match reverse_block_lookup.get(&encrypted_block) {
             Some(x) => *x,
             None => unreachable!(),
