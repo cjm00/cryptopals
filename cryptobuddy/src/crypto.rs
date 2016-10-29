@@ -4,7 +4,7 @@ use rust_crypto::{buffer, aes, blockmodes};
 use rust_crypto::buffer::{ ReadBuffer, WriteBuffer};
 use std::iter;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum EncryptionMode {
     ECB,
     CBC
