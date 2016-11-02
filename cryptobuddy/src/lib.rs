@@ -5,6 +5,7 @@ extern crate rand;
 pub mod freq_analysis;
 pub mod crypto;
 pub mod utils;
+pub mod mersenne;
 
 
 
