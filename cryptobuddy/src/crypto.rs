@@ -4,7 +4,13 @@ use rust_crypto::{buffer, aes, blockmodes};
 use rust_crypto::buffer::{ReadBuffer, WriteBuffer};
 use std::iter;
 
-#[derive(Debug, PartialEq, Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
+pub enum PaddingError{
+    EmptyInput,
+    InvalidPadding
+}
+
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum EncryptionMode {
     ECB,
     CBC,
@@ -123,30 +129,30 @@ pub fn aes_cbc_decrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     output
 }
 
-pub fn check_pkcs7_pad_size(data: &[u8]) -> Option<usize> {
-    debug_assert!(data.len() >= 16);
-    match data.iter().cloned().last().unwrap() {
-        0 => {
+pub fn check_pkcs7_pad_size(data: &[u8]) -> Result<usize, PaddingError> {
+    use self::PaddingError::{EmptyInput, InvalidPadding};
+    match data.iter().cloned().last() {
+        None => Err(EmptyInput),
+        Some(0) => {
             if data.iter()
                 .cloned()
                 .rev()
                 .take(16)
                 .all(|z| z == 0) {
-                Some(16)
+                Ok(16)
             } else {
-                None
+                Err(InvalidPadding)
             }
         }
-
-        u => {
+        Some(u) => {
             if data.iter()
                 .cloned()
                 .rev()
                 .take(u as usize)
                 .all(|z| z == u) {
-                Some(u as usize)
+                Ok(u as usize)
             } else {
-                None
+                Err(InvalidPadding)
             }
         }
     }
@@ -156,8 +162,8 @@ pub fn check_pkcs7_pad_size(data: &[u8]) -> Option<usize> {
 pub fn trim_padding(data: &mut Vec<u8>) -> () {
     let data_len = data.len(); // Non-lexical borrows pls
     match check_pkcs7_pad_size(data) {
-        None => (),
-        Some(u) => data.resize(data_len - u, 0),
+        Err(_) => (),
+        Ok(u) => data.truncate(data_len - u),
     }
 
 }
