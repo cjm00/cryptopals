@@ -1,5 +1,4 @@
 extern crate cryptobuddy;
-extern crate rustc_serialize;
 
 use cryptobuddy::{crypto, utils};
 
@@ -47,7 +46,7 @@ impl Profile {
         let mut uid = None;
         let mut role = None;
 
-        for token in cookie.splitn(4, '&') {
+        for token in cookie.split('&') {
             let mut split_token = token.splitn(2, '=');
             match (split_token.next(), split_token.next()) {
                 (None, None) => continue,
@@ -125,7 +124,7 @@ fn forge_email_string_with_offset() -> String {
 
 fn main() {
     let server = EncryptionServer::new();
-    
+
     let bogus_email = forge_email_string_with_offset();
     let bogus_profile = Profile::for_user(bogus_email.as_str());
     let bogus_encrypted = server.encrypt_cookie(bogus_profile.to_cookie().as_str());
@@ -134,7 +133,11 @@ fn main() {
     let legit_profile = Profile::for_user("hackr@aol.com");
     let legit_enc = server.encrypt_cookie(legit_profile.to_cookie().as_str());
 
-    let doctored_encrypted_profile: Vec<u8> = legit_enc[..legit_enc.len() - 16].iter().cloned().chain(lifted_admin_block.iter().cloned()).collect();
+    let doctored_encrypted_profile: Vec<u8> = legit_enc[..legit_enc.len() - 16]
+        .iter()
+        .cloned()
+        .chain(lifted_admin_block.iter().cloned())
+        .collect();
     let doctored_profile = server.decrypt_cookie(&doctored_encrypted_profile);
 
     println!("{:?}", doctored_profile.unwrap());
