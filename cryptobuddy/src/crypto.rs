@@ -159,11 +159,11 @@ pub fn check_pkcs7_pad_size(data: &[u8]) -> Result<usize, PaddingError> {
 }
 
 
-pub fn trim_padding(data: &mut Vec<u8>) -> () {
+pub fn trim_padding(data: &mut Vec<u8>) -> Result<(), PaddingError> {
     let data_len = data.len(); // Non-lexical borrows pls
     match check_pkcs7_pad_size(data) {
-        Err(_) => (),
-        Ok(u) => data.truncate(data_len - u),
+        Err(t) => Err(t),
+        Ok(u) => Ok(data.truncate(data_len - u)),
     }
 
 }
