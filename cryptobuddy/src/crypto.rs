@@ -4,11 +4,7 @@ use rust_crypto::{buffer, aes, blockmodes};
 use rust_crypto::buffer::{ReadBuffer, WriteBuffer};
 use std::iter;
 
-#[derive(Debug, Copy, Clone)]
-pub enum PaddingError{
-    EmptyInput,
-    InvalidPadding
-}
+use pkcs7;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum EncryptionMode {
@@ -17,7 +13,6 @@ pub enum EncryptionMode {
 }
 
 pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
-    debug_assert_eq!(a.len(), b.len());
     a.iter()
         .zip(b.iter())
         .map(|(x, y)| x ^ y)
@@ -43,21 +38,6 @@ pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
     false
 }
 
-pub fn pkcs7_pad(block: &[u8], block_size: usize) -> Vec<u8> {
-    if (block.len() % block_size) == 0 {
-        block.iter()
-            .cloned()
-            .chain(iter::repeat(block_size as u8).take(block_size))
-            .collect()
-    } else {
-        let residue: u8 = (block.len() % block_size) as u8;
-        block.iter()
-            .cloned()
-            .chain(iter::repeat(block_size as u8 - residue).take(block_size - residue as usize))
-            .collect()
-
-    }
-}
 
 pub fn aes_ecb_decrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
     debug_assert_eq!(16usize, key.len());
@@ -65,9 +45,10 @@ pub fn aes_ecb_decrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
     for block in data.chunks(16) {
         output.extend(aes_ecb_decrypt_raw(block, key))
     }
-    trim_padding(&mut output);
+    pkcs7::trim(&mut output).expect("Invalid Padding");
     output
 }
+
 
 fn aes_ecb_decrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
     let mut read_buffer = buffer::RefReadBuffer::new(data);
@@ -83,13 +64,14 @@ fn aes_ecb_decrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
 
 
 pub fn aes_ecb_encrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
-    let data: Vec<u8> = pkcs7_pad(data, key.len());
+    let data: Vec<u8> = pkcs7::pad(data, key.len());
     let mut output = Vec::<u8>::new();
     for block in data.chunks(16) {
         output.extend(aes_ecb_encrypt_raw(block, key));
     }
     output
 }
+
 
 fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
     let mut read_buffer = buffer::RefReadBuffer::new(data);
@@ -103,8 +85,9 @@ fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
     output
 }
 
+
 pub fn aes_cbc_encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
-    let data = pkcs7_pad(data, 16);
+    let data = pkcs7::pad(data, 16);
     let mut iv: Vec<u8> = iv.into();
     let mut output = Vec::<u8>::new();
     for block in data.chunks(16) {
@@ -116,6 +99,7 @@ pub fn aes_cbc_encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     output
 }
 
+
 pub fn aes_cbc_decrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut iv: Vec<u8> = iv.into();
     let mut output = Vec::<u8>::new();
@@ -125,48 +109,10 @@ pub fn aes_cbc_decrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
         output.extend(decrypt_block);
         iv = block.into();
     }
-    trim_padding(&mut output);
+    pkcs7::trim(&mut output).expect("Invalid Padding");
     output
 }
 
-pub fn check_pkcs7_pad_size(data: &[u8]) -> Result<usize, PaddingError> {
-    use self::PaddingError::{EmptyInput, InvalidPadding};
-    match data.iter().cloned().last() {
-        None => Err(EmptyInput),
-        Some(0) => {
-            if data.iter()
-                .cloned()
-                .rev()
-                .take(16)
-                .all(|z| z == 0) {
-                Ok(16)
-            } else {
-                Err(InvalidPadding)
-            }
-        }
-        Some(u) => {
-            if data.iter()
-                .cloned()
-                .rev()
-                .take(u as usize)
-                .all(|z| z == u) {
-                Ok(u as usize)
-            } else {
-                Err(InvalidPadding)
-            }
-        }
-    }
-}
-
-
-pub fn trim_padding(data: &mut Vec<u8>) -> Result<(), PaddingError> {
-    let data_len = data.len(); // Non-lexical borrows pls
-    match check_pkcs7_pad_size(data) {
-        Err(t) => Err(t),
-        Ok(u) => Ok(data.truncate(data_len - u)),
-    }
-
-}
 
 pub fn ecb_oracle(data: &[u8]) -> EncryptionMode {
     match detect_repeated_blocks(data, 16) {

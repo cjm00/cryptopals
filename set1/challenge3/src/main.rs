@@ -24,5 +24,4 @@ fn main() {
     }
     println!("{}", str::from_utf8(&output).unwrap());
     println!("Key: {}", key);
-    println!("{}", score);
 }

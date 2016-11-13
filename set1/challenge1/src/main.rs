@@ -8,4 +8,5 @@ fn main() {
     let intermediate = input.from_hex().unwrap();
     let output = intermediate.to_base64(STANDARD);
     println!("{}", output);
+    assert_eq!(output, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t")
 }
