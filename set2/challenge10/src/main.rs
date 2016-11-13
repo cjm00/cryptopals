@@ -7,7 +7,7 @@ use std::iter;
 use std::str;
 
 use rustc_serialize::base64::{FromBase64};
-use cryptobuddy::crypto;
+use cryptobuddy::block;
 
 
 fn load_data () -> Vec<u8> {
@@ -22,7 +22,7 @@ fn main() {
     let data: Vec<u8> = load_data();
     let iv: Vec<u8> = iter::repeat(0u8).take(16).collect();
     let key: Vec<u8> = "YELLOW SUBMARINE".into();
-    let decrypt_data = crypto::aes_cbc_decrypt(&data, &key, &iv);
+    let decrypt_data = block::aes_cbc_decrypt(&data, &key, &iv);
     println!("{}", str::from_utf8(&decrypt_data).unwrap());
 
 }

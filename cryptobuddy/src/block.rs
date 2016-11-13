@@ -2,40 +2,14 @@ extern crate crypto as rust_crypto;
 
 use rust_crypto::{buffer, aes, blockmodes};
 use rust_crypto::buffer::{ReadBuffer, WriteBuffer};
-use std::iter;
 
 use pkcs7;
+use utils;
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum EncryptionMode {
     ECB,
     CBC,
-}
-
-pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
-    a.iter()
-        .zip(b.iter())
-        .map(|(x, y)| x ^ y)
-        .collect()
-}
-
-pub fn single_byte_xor(stream: &[u8], key: u8) -> Vec<u8> {
-    let key_stream: Vec<u8> = iter::repeat(key).take(stream.len()).collect();
-    fixed_xor(stream, &key_stream)
-}
-
-pub fn repeating_key_xor(stream: &[u8], key: &[u8]) -> Vec<u8> {
-    let key_stream: Vec<u8> = key.iter().cloned().cycle().take(stream.len()).collect();
-    fixed_xor(stream, &key_stream)
-}
-
-pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
-    for (index, block) in stream.chunks(block_size).enumerate() {
-        if stream.chunks(block_size).skip(index + 1).any(|z| z == block) {
-            return true;
-        }
-    }
-    false
 }
 
 
@@ -91,7 +65,7 @@ pub fn aes_cbc_encrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut iv: Vec<u8> = iv.into();
     let mut output = Vec::<u8>::new();
     for block in data.chunks(16) {
-        let mut encrypt_block = fixed_xor(block, &iv);
+        let mut encrypt_block = utils::fixed_xor(block, &iv);
         encrypt_block = aes_ecb_encrypt_raw(&encrypt_block, key);
         output.extend(encrypt_block.iter().cloned());
         iv = encrypt_block;
@@ -105,7 +79,7 @@ pub fn aes_cbc_decrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
     let mut output = Vec::<u8>::new();
     for block in data.chunks(16) {
         let mut decrypt_block = aes_ecb_decrypt_raw(block, key);
-        decrypt_block = fixed_xor(&decrypt_block, &iv);
+        decrypt_block = utils::fixed_xor(&decrypt_block, &iv);
         output.extend(decrypt_block);
         iv = block.into();
     }
@@ -115,7 +89,7 @@ pub fn aes_cbc_decrypt(data: &[u8], key: &[u8], iv: &[u8]) -> Vec<u8> {
 
 
 pub fn ecb_oracle(data: &[u8]) -> EncryptionMode {
-    match detect_repeated_blocks(data, 16) {
+    match utils::detect_repeated_blocks(data, 16) {
         true => EncryptionMode::ECB,
         false => EncryptionMode::CBC,
     }

@@ -7,7 +7,7 @@ use std::io::prelude::*;
 use std::str;
 
 use rustc_serialize::hex::{FromHex};
-use cryptobuddy::{crypto, freq_analysis};
+use cryptobuddy::{utils, freq_analysis};
 
 
 fn main() {
@@ -22,7 +22,7 @@ fn main() {
         let foo: Vec<u8> = line.unwrap().from_hex().unwrap();
 
         for key in 0..128 {
-            let decrypt = crypto::single_byte_xor(&foo, key);
+            let decrypt = utils::single_byte_xor(&foo, key);
             let score = freq_analysis::text_score(&decrypt);
             if score <= best_word_score {
                 best_word_score = score;

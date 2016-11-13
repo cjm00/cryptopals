@@ -1,8 +1,8 @@
 extern crate cryptobuddy;
 extern crate rand;
 
-use cryptobuddy::{utils, crypto};
-use cryptobuddy::crypto::EncryptionMode;
+use cryptobuddy::{utils, block};
+use cryptobuddy::block::EncryptionMode;
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -29,15 +29,15 @@ fn encrypt_under_random_key(data: &[u8]) -> (EncryptionMode, Vec<u8>) {
     let data = utils::pad_both_sides(data);
 
     match mode {
-        EncryptionMode::ECB => {(mode, crypto::aes_ecb_encrypt(&data, &key))},
-        EncryptionMode::CBC => {(mode, crypto::aes_cbc_encrypt(&data, &key, &iv))}
+        EncryptionMode::ECB => {(mode, block::aes_ecb_encrypt(&data, &key))},
+        EncryptionMode::CBC => {(mode, block::aes_cbc_encrypt(&data, &key, &iv))}
     }
 }
 
 fn main() {
     let plaintext = load_data();
     let (mode, encrypted_data) = encrypt_under_random_key(&plaintext);
-    let guess = crypto::ecb_oracle(&encrypted_data);
+    let guess = block::ecb_oracle(&encrypted_data);
     if mode == guess {println!("Guessed correctly: {:?}", mode);}
     else {println!("Guessed incorrectly: {:?} Actually: {:?}", guess, mode);}
 }

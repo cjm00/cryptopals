@@ -2,7 +2,7 @@ extern crate cryptobuddy;
 extern crate rustc_serialize;
 
 use rustc_serialize::base64::FromBase64;
-use cryptobuddy::{crypto, utils};
+use cryptobuddy::{block, utils};
 
 use std::fs::File;
 use std::io::prelude::*;
@@ -27,7 +27,7 @@ impl SecretBlob {
     fn encrypt_with_prefix(&self, prefix: &[u8]) -> Vec<u8> {
         let prefixed_secret: Vec<u8> =
             prefix.iter().cloned().chain(self.secret.iter().cloned()).collect();
-        crypto::aes_ecb_encrypt(&prefixed_secret, &self.key)
+        block::aes_ecb_encrypt(&prefixed_secret, &self.key)
     }
 }
 
@@ -68,9 +68,9 @@ fn find_block_size(secret: &SecretBlob) -> usize {
 fn test_for_ecb_mode(secret: &SecretBlob) -> bool {
     let prefix: Vec<u8> = iter::repeat(b'A').take(200).collect();
     let encrypted_data = secret.encrypt_with_prefix(&prefix);
-    match crypto::ecb_oracle(&encrypted_data) {
-        crypto::EncryptionMode::ECB => true,
-        crypto::EncryptionMode::CBC => false,
+    match block::ecb_oracle(&encrypted_data) {
+        block::EncryptionMode::ECB => true,
+        block::EncryptionMode::CBC => false,
     }
 }
 
@@ -156,7 +156,7 @@ fn decrypt_byte(byte: usize, known: &[u8], secret: &SecretBlob, block_size: usiz
             .nth(block_number)
             .unwrap()
             .into();
-            
+
         match reverse_block_lookup.get(&encrypted_block) {
             Some(x) => *x,
             None => unreachable!(),

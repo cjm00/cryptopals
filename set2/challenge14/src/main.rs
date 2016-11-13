@@ -1,7 +1,7 @@
 extern crate cryptobuddy;
 extern crate rand;
 
-use cryptobuddy::{utils, crypto};
+use cryptobuddy::{utils, block};
 use rand::Rng;
 
 use std::fs::File;
@@ -39,7 +39,7 @@ impl SecretBlob {
             .chain(infix.iter().cloned())
             .chain(self.secret.iter().cloned())
             .collect();
-        crypto::aes_ecb_encrypt(&infixed_secret, &self.key)
+        block::aes_ecb_encrypt(&infixed_secret, &self.key)
     }
 }
 

@@ -2,7 +2,7 @@ extern crate cryptobuddy;
 extern crate rustc_serialize;
 
 use rustc_serialize::hex::{FromHex};
-use cryptobuddy::{crypto, freq_analysis};
+use cryptobuddy::{utils, freq_analysis};
 use std::str;
 
 
@@ -14,7 +14,7 @@ fn main() {
     let mut key: char = 'a';
 
     for x in b'A'..b'z'+1 {
-        let decrypt = crypto::single_byte_xor(&target, x);
+        let decrypt = utils::single_byte_xor(&target, x);
         let temp_score = freq_analysis::text_score(&decrypt);
         if temp_score < score {
             score = temp_score;

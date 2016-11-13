@@ -1,6 +1,6 @@
 extern crate cryptobuddy;
 
-use cryptobuddy::{crypto, utils};
+use cryptobuddy::{block, utils};
 
 use std::fmt::Write;
 use std::str;
@@ -98,11 +98,11 @@ impl EncryptionServer {
     }
 
     fn encrypt_cookie(&self, cookie: &str) -> Vec<u8> {
-        crypto::aes_ecb_encrypt(cookie.as_bytes(), &self.key)
+        block::aes_ecb_encrypt(cookie.as_bytes(), &self.key)
     }
 
     fn decrypt_cookie(&self, cookie: &[u8]) -> Result<Profile, ProfileError> {
-        let cookie = crypto::aes_ecb_decrypt(cookie, &self.key);
+        let cookie = block::aes_ecb_decrypt(cookie, &self.key);
         match str::from_utf8(&cookie) {
             Ok(s) => Profile::from_cookie(s),
             Err(_) => Err(ProfileError::ParseError),

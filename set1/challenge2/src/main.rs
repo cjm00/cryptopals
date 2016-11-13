@@ -2,7 +2,7 @@ extern crate cryptobuddy;
 extern crate rustc_serialize;
 
 use rustc_serialize::hex::{FromHex, ToHex};
-use cryptobuddy::crypto::fixed_xor;
+use cryptobuddy::utils::fixed_xor;
 
 
 fn main() {

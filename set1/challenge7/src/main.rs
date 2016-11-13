@@ -6,7 +6,7 @@ use std::io::prelude::*;
 use std::str;
 
 use rustc_serialize::base64::{FromBase64};
-use cryptobuddy::crypto;
+use cryptobuddy::block;
 
 static SECRET_KEY: &'static str = "YELLOW SUBMARINE";
 
@@ -21,6 +21,6 @@ fn load_data () -> Vec<u8> {
 fn main() {
     let data = load_data();
     let key: Vec<u8> = SECRET_KEY.into();
-    let output = crypto::aes_ecb_decrypt(&data, &key);
+    let output = block::aes_ecb_decrypt(&data, &key);
     println!("{}", str::from_utf8(&output).unwrap());
 }

@@ -7,7 +7,7 @@ use std::io::prelude::*;
 use std::str;
 
 use rustc_serialize::base64::{FromBase64};
-use cryptobuddy::crypto;
+use cryptobuddy::utils;
 
 
 
@@ -17,6 +17,6 @@ fn main() {
 
     for (index, line) in f.lines().enumerate() {
         let line = line.unwrap().from_base64().unwrap();
-        if crypto::detect_repeated_blocks(&line, 16) {println!("Line {} has repeated blocks.", index);}
+        if utils::detect_repeated_blocks(&line, 16) {println!("Line {} has repeated blocks.", index);}
     }
 }

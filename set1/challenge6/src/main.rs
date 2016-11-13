@@ -7,7 +7,7 @@ use std::io::prelude::*;
 use std::str;
 
 use rustc_serialize::base64::FromBase64;
-use cryptobuddy::{crypto, freq_analysis, utils};
+use cryptobuddy::{freq_analysis, utils};
 use ordered_float::NotNaN;
 
 const MAX_KEYSIZE: usize = 40;
@@ -59,7 +59,7 @@ fn find_single_byte_key(data: &[u8]) -> u8 {
     let mut best_key = 0;
     let mut best_score = 1_000_000f64;
     for x in 0..255 {
-        let decrypt = crypto::single_byte_xor(&data, x);
+        let decrypt = utils::single_byte_xor(&data, x);
         let score = freq_analysis::text_score(&decrypt);
         if score <= best_score {
             best_score = score;
@@ -80,7 +80,7 @@ fn main() {
         key.push(find_single_byte_key(&block));
     }
     println!("{}",
-             str::from_utf8(&crypto::repeating_key_xor(&data, &key)).unwrap());
+             str::from_utf8(&utils::repeating_key_xor(&data, &key)).unwrap());
     println!("Key = \"{}\"", str::from_utf8(&key).unwrap());
 
 
