@@ -9,15 +9,18 @@ pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
         .collect()
 }
 
+
 pub fn single_byte_xor(stream: &[u8], key: u8) -> Vec<u8> {
     let key_stream: Vec<u8> = iter::repeat(key).take(stream.len()).collect();
     fixed_xor(stream, &key_stream)
 }
 
+
 pub fn repeating_key_xor(stream: &[u8], key: &[u8]) -> Vec<u8> {
     let key_stream: Vec<u8> = key.iter().cloned().cycle().take(stream.len()).collect();
     fixed_xor(stream, &key_stream)
 }
+
 
 pub fn int_div(a: usize, b: usize) -> f64 {
     a as f64 / b as f64
@@ -64,4 +67,16 @@ pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
         }
     }
     false
+}
+
+
+#[cfg(test)]
+mod utils_tests {
+    use utils;
+    #[test]
+    fn hamming_distance_test() {
+        let a: Vec<u8> = "this is a test".into();
+        let b: Vec<u8> = "wokka wokka!!!".into();
+        assert_eq!(37, utils::hamming_distance(&a, &b))
+    }
 }

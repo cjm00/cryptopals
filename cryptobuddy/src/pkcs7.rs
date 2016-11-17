@@ -1,10 +1,14 @@
 use std::iter;
 
-#[derive(Debug, Copy, Clone)]
-pub enum PaddingError{
+const KEYSIZE: usize = 16;
+
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum PaddingError {
     EmptyInput,
-    InvalidPadding
+    InvalidPadding,
 }
+
 
 pub fn pad(block: &[u8], block_size: usize) -> Vec<u8> {
     if (block.len() % block_size) == 0 {
@@ -25,20 +29,20 @@ pub fn pad(block: &[u8], block_size: usize) -> Vec<u8> {
 
 pub fn pad_size(data: &[u8]) -> Result<usize, PaddingError> {
     use self::PaddingError::{EmptyInput, InvalidPadding};
-    match data.iter().cloned().last() {
+    match data.iter().last() {
         None => Err(EmptyInput),
-        Some(0) => {
+        Some(&0) => {
             if data.iter()
                 .cloned()
                 .rev()
-                .take(16)
+                .take(KEYSIZE)
                 .all(|z| z == 0) {
-                Ok(16)
+                Ok(KEYSIZE)
             } else {
                 Err(InvalidPadding)
             }
         }
-        Some(u) => {
+        Some(&u) => {
             if data.iter()
                 .cloned()
                 .rev()
@@ -60,4 +64,38 @@ pub fn trim(data: &mut Vec<u8>) -> Result<(), PaddingError> {
         Ok(u) => Ok(data.truncate(data_len - u)),
     }
 
+}
+
+#[cfg(test)]
+mod pkcs7_tests {
+    use super::*;
+    #[test]
+    fn pad_test_1() {
+        let block = vec![5; 5];
+        let block = pad(&block, 16);
+        let output = vec![5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11];
+        assert_eq!(block, output);
+    }
+
+    #[test]
+    fn valid_pad_size_test() {
+        let block = vec![5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11];
+        let pad = pad_size(&block);
+        assert_eq!(pad, Ok(11));
+    }
+
+    #[test]
+    fn invalid_pad_size_test() {
+        let block = vec![1,2,3,4,5,6,7,8];
+        let pad = pad_size(&block);
+        assert_eq!(pad, Err(PaddingError::InvalidPadding));
+    }
+
+    #[test]
+    fn empty_pad_size_test() {
+        let block = vec![];
+        let pad = pad_size(&block);
+        assert_eq!(pad, Err(PaddingError::EmptyInput));
+
+    }
 }

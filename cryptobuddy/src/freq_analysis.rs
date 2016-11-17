@@ -17,6 +17,7 @@ pub struct CharacterCounter {
     chars: [usize; 27],
 }
 
+
 impl CharacterCounter {
     pub fn from<I: Iterator<Item = char>>(x: I) -> CharacterCounter {
         let mut out = CharacterCounter { chars: [0usize; TABLE_LENGTH] };
@@ -51,9 +52,9 @@ impl CharacterCounter {
                 _ => out.chars[26] += 1,
             }
         }
-
         out
     }
+
 
     pub fn total(&self) -> usize {
         let mut out = 0usize;
@@ -65,11 +66,13 @@ impl CharacterCounter {
     }
 }
 
+
 #[derive(Debug)]
 pub struct CharacterFreq {
     char_freqs: [f64; TABLE_LENGTH],
     cardinality: usize,
 }
+
 
 impl CharacterFreq {
     pub fn from_count(x: CharacterCounter) -> CharacterFreq {
@@ -96,6 +99,7 @@ impl CharacterFreq {
     }
 }
 
+
 fn chi_squared_eval(s: &str) -> f64 {
     if !s.is_ascii() {
         return f64::INFINITY;
@@ -104,6 +108,7 @@ fn chi_squared_eval(s: &str) -> f64 {
     let freqs = CharacterFreq::from_count(counts);
     freqs.chi_squared_test()
 }
+
 
 pub fn text_score(input: &[u8]) -> f64 {
     if input.iter()
