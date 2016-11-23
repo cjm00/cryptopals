@@ -5,3 +5,5 @@ authors = ["Chris McDonald <mail.chris.mcdonald@gmail.com>"]
 
 [dependencies]
 cryptobuddy = {path = "../../cryptobuddy/"}
+rustc-serialize = "0.3"
+rand = "0.3"

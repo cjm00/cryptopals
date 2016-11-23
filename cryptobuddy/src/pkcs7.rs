@@ -33,10 +33,9 @@ pub fn pad_size(data: &[u8]) -> Result<usize, PaddingError> {
         None => Err(EmptyInput),
         Some(&0) => {
             if data.iter()
-                .cloned()
                 .rev()
                 .take(KEYSIZE)
-                .all(|z| z == 0) {
+                .all(|z| *z == 0) {
                 Ok(KEYSIZE)
             } else {
                 Err(InvalidPadding)
@@ -44,10 +43,9 @@ pub fn pad_size(data: &[u8]) -> Result<usize, PaddingError> {
         }
         Some(&u) => {
             if data.iter()
-                .cloned()
                 .rev()
                 .take(u as usize)
-                .all(|z| z == u) {
+                .all(|z| *z == u) {
                 Ok(u as usize)
             } else {
                 Err(InvalidPadding)
