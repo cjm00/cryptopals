@@ -1,6 +1,5 @@
 use std::iter;
 
-const KEYSIZE: usize = 16;
 
 
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -31,21 +30,12 @@ pub fn pad_size(data: &[u8]) -> Result<usize, PaddingError> {
     use self::PaddingError::{EmptyInput, InvalidPadding};
     match data.iter().last() {
         None => Err(EmptyInput),
-        Some(&0) => {
-            if data.iter()
-                .rev()
-                .take(KEYSIZE)
-                .all(|z| *z == 0) {
-                Ok(KEYSIZE)
-            } else {
-                Err(InvalidPadding)
-            }
-        }
+        Some(&0) => Err(InvalidPadding),
         Some(&u) => {
             if data.iter()
                 .rev()
                 .take(u as usize)
-                .all(|z| *z == u) {
+                .all(|&z| z == u) {
                 Ok(u as usize)
             } else {
                 Err(InvalidPadding)
