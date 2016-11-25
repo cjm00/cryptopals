@@ -54,7 +54,7 @@ pub fn aes_ecb_encrypt(data: &[u8], key: &[u8]) -> Vec<u8> {
 }
 
 
-fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
+pub fn aes_ecb_encrypt_raw(data: &[u8], key: &[u8]) -> Vec<u8> {
     let mut read_buffer = buffer::RefReadBuffer::new(data);
     let mut buf = [0u8; KEYSIZE];
     let mut write_buffer = buffer::RefWriteBuffer::new(&mut buf);

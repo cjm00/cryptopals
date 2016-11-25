@@ -1,6 +1,7 @@
 use rand::{Rng, thread_rng, random};
-use std::iter;
 
+use std::iter;
+use std::mem::transmute;
 
 pub fn fixed_xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     a.iter()
@@ -67,6 +68,11 @@ pub fn detect_repeated_blocks(stream: &[u8], block_size: usize) -> bool {
         }
     }
     false
+}
+
+pub fn u64_to_bytes(u: u64) -> [u8; 8] {
+    let output: [u8; 8] = unsafe { transmute(u.to_le()) };
+    output
 }
 
 

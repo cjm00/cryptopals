@@ -6,3 +6,4 @@ pub mod block;
 pub mod utils;
 pub mod mersenne;
 pub mod pkcs7;
+pub mod stream;

@@ -61,20 +61,20 @@ mod pkcs7_tests {
     fn pad_test_1() {
         let block = vec![5; 5];
         let block = pad(&block, 16);
-        let output = vec![5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11];
+        let output = vec![5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11];
         assert_eq!(block, output);
     }
 
     #[test]
     fn valid_pad_size_test() {
-        let block = vec![5,5,5,5,5,11,11,11,11,11,11,11,11,11,11,11];
+        let block = vec![5, 5, 5, 5, 5, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11];
         let pad = pad_size(&block);
         assert_eq!(pad, Ok(11));
     }
 
     #[test]
     fn invalid_pad_size_test() {
-        let block = vec![1,2,3,4,5,6,7,8];
+        let block = vec![1, 2, 3, 4, 5, 6, 7, 8];
         let pad = pad_size(&block);
         assert_eq!(pad, Err(PaddingError::InvalidPadding));
     }
