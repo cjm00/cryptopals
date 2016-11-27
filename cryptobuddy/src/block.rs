@@ -115,6 +115,8 @@ pub fn ecb_oracle(data: &[u8]) -> EncryptionMode {
 mod block_crypto_tests {
     use super::*;
     use std::iter;
+    const KEYSIZE: usize = 16;
+
     #[test]
     fn aes_cbc_test() {
         let iv: Vec<u8> = iter::repeat(2u8).take(KEYSIZE).collect();

@@ -31,6 +31,16 @@ impl Twister32 {
         output
     }
 
+    pub fn from_state_array(state: &[u32]) -> Twister32 {
+        debug_assert_eq!(state.len(), N);
+        let mut output = Twister32 {
+            state_array: [0u32; N],
+            index: 0,
+        };
+        output.state_array.copy_from_slice(state);
+        output
+    }
+
     fn seed(&mut self, seed: u32) -> () {
         self.state_array[0] = seed;
         for x in 1..N {
@@ -56,6 +66,12 @@ impl Twister32 {
 
     }
 
+    pub fn get_state_array(&self) -> [u32; N] {
+        let mut output = [0u32; N];
+        output.copy_from_slice(&self.state_array);
+        output
+    }
+
     fn twist(&mut self) -> () {
         for x in 0..N {
             let i = (self.state_array[x] & UPPER_MASK) +
@@ -68,4 +84,92 @@ impl Twister32 {
         }
         self.index = 0;
     }
+}
+
+
+pub fn untemper(output: u32) -> u32 {
+    let mut o = output;
+    o = invert_4(o);
+    o = invert_3(o);
+    o = invert_2(o);
+    o = invert_1(o);
+    o
+}
+
+fn invert_4(i: u32) -> u32 {
+    let mut i = i;
+    i ^= i >> L;
+    i
+}
+
+fn invert_3(i: u32) -> u32 {
+    // out ^= (out << T) & C;
+    // T = 15
+    let mut i = i;
+    i ^= (i << T) & C;
+    i
+}
+
+fn invert_2(i: u32) -> u32 {
+    // out ^= (out << S) & B;
+    // S = 7
+    const MASK: u32 = 0b11_11111;
+    let mut i = i;
+    i ^= ((i << S) & B) & (MASK << 7);
+    i ^= ((i << S) & B) & (MASK << 14);
+    i ^= ((i << S) & B) & (MASK << 21);
+    i ^= ((i << S) & B) & (MASK << 28);
+    i
+}
+
+fn invert_1(i: u32) -> u32 {
+    // out ^= (out >> U) & D;
+    // U = 11
+    const MASK: u32 = 0b11111_11111_10000_00000_00000_00000_00;
+    let mut i = i;
+    i ^= ((i >> U) & D) & (MASK >> 11);
+    i ^= ((i >> U) & D) & (MASK >> 22);
+    i
+}
+
+
+#[test]
+fn untemper_test() {
+    let mut m = Twister32::new(5000);
+    let x = m.next_u32();
+    let m_state = m.get_state_array();
+    let x = untemper(x);
+    assert_eq!(m_state[0], x);
+}
+
+#[test]
+fn invert_4_test() {
+    let k = 0b101010101010101010u32;
+    let j = k ^ (k >> L);
+    let l = invert_4(j);
+    assert_eq!(k, l);
+}
+
+#[test]
+fn invert_3_test() {
+    let k = 0b101010101010101010u32;
+    let j = k ^ ((k << T) & C);
+    let l = invert_3(j);
+    assert_eq!(k, l);
+}
+
+#[test]
+fn invert_2_test() {
+    let k = 0b101010101010101010u32;
+    let j = k ^ ((k << S) & B);
+    let l = invert_2(j);
+    assert_eq!(k, l);
+}
+
+#[test]
+fn invert_1_test() {
+    let k = 0b101010101010101010u32;
+    let j = k ^ ((k >> U) & D);
+    let l = invert_1(j);
+    assert_eq!(k, l);
 }
