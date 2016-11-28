@@ -47,6 +47,10 @@ pub fn random_key() -> [u8; 16] {
     random()
 }
 
+pub fn random_nonce() -> [u8; 8] {
+    let n: u64 = random();
+    u64_to_bytes(n)
+}
 
 pub fn pad_both_sides(data: &[u8]) -> Vec<u8> {
     let mut rng = thread_rng();
