@@ -57,9 +57,11 @@ fn main() {
     let key: Vec<u8> = "YELLOW SUBMARINE".into();
     let data = block::aes_ecb_decrypt(&load_data(), &key);
     let mut server = CryptoServer::new(&data);
+
     let original_ciphertext = server.get_data().to_owned();
     let zeroes: Vec<u8> = vec![0u8; original_ciphertext.len()];
     server.edit(0, &zeroes).unwrap();
+    
     let new_ciphertext = server.get_data().to_owned();
     let plaintext = utils::fixed_xor(&original_ciphertext, &new_ciphertext);
     println!("{}", String::from_utf8_lossy(&plaintext));
