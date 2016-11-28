@@ -14,9 +14,9 @@ const F: u32 = 1812433253;
 const LOWER_MASK: u32 = (1 << R) - 1;
 const UPPER_MASK: u32 = !LOWER_MASK;
 
-
+#[derive(Clone, Debug)]
 pub struct Twister32 {
-    state_array: [u32; N],
+    state_array: Vec<u32>,
     index: usize,
 }
 
@@ -24,7 +24,7 @@ pub struct Twister32 {
 impl Twister32 {
     pub fn new(seed: u32) -> Twister32 {
         let mut output = Twister32 {
-            state_array: [0u32; N],
+            state_array: vec![0u32; N],
             index: N + 1,
         };
         output.seed(seed);
@@ -34,7 +34,7 @@ impl Twister32 {
     pub fn from_state_array(state: &[u32]) -> Twister32 {
         debug_assert_eq!(state.len(), N);
         let mut output = Twister32 {
-            state_array: [0u32; N],
+            state_array: vec![0u32; N],
             index: 0,
         };
         output.state_array.copy_from_slice(state);
@@ -45,8 +45,8 @@ impl Twister32 {
         self.state_array[0] = seed;
         for x in 1..N {
             self.state_array[x] =
-                F.wrapping_mul((self.state_array[x - 1] ^ (self.state_array[x - 1] >> (W - 2))) +
-                               x as u32);
+                F.wrapping_mul((self.state_array[x - 1] ^ ((self.state_array[x - 1] >> (W - 2))) +
+                               x as u32));
         }
     }
 

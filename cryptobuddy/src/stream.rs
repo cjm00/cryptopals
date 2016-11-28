@@ -1,5 +1,6 @@
 use block;
 use utils;
+use mersenne::Twister32;
 
 #[derive(Clone, Debug)]
 pub enum CTRConstructionError {
@@ -90,4 +91,70 @@ impl<'a> Iterator for CTRIterator<'a> {
             }
         }
     }
+}
+
+pub struct MTStream {
+    seed: u32,
+}
+
+impl MTStream {
+    pub fn new<T: Into<u32>>(seed: T) -> MTStream {
+        MTStream{seed: seed.into()}
+    }
+
+    pub fn iter(&self) -> MTStreamIter {
+        MTStreamIter {
+            twister: Twister32::new(self.seed as u32),
+            buffer: [0; 4],
+            buffer_index: None,
+        }
+    }
+
+    pub fn crypt(&self, target: &[u8]) -> Vec<u8> {
+        target.iter().cloned().zip(self.iter()).map(|(x, y)| x ^ y).collect()
+    }
+}
+
+pub struct MTStreamIter {
+    twister: Twister32,
+    buffer: [u8; 4],
+    buffer_index: Option<usize>,
+}
+
+impl MTStreamIter {
+    fn populate_buffer(&mut self) {
+        self.buffer.copy_from_slice(&utils::u32_to_bytes(self.twister.next_u32()));
+    }
+}
+
+impl Iterator for MTStreamIter {
+    type Item = u8;
+    fn next(&mut self) -> Option<u8> {
+        match self.buffer_index {
+            None => {
+                self.buffer_index = Some(1);
+                self.populate_buffer();
+                Some(self.buffer[0])
+            }
+            Some(u) if u < 4 => {
+                self.buffer_index = Some(u + 1);
+                Some(self.buffer[u])
+            }
+            Some(_) => {
+                self.populate_buffer();
+                self.buffer_index = Some(1);
+                Some(self.buffer[0])
+            }
+        }
+    }
+}
+
+
+#[test]
+fn test_MTStreamCrypt() {
+    let plaintext: Vec<u8> = "BANANAS APPLES GRAPES ORANGES BLUEBERRIES".into();
+    let crypter = MTStream::new(500);
+    let ciphertext = crypter.crypt(&plaintext);
+    let decipher_text = crypter.crypt(&ciphertext);
+    assert_eq!(plaintext, decipher_text);
 }

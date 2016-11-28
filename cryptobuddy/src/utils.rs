@@ -75,6 +75,11 @@ pub fn u64_to_bytes(u: u64) -> [u8; 8] {
     output
 }
 
+pub fn u32_to_bytes(u: u32) -> [u8; 4] {
+    let output: [u8; 4] = unsafe { transmute(u.to_le()) };
+    output
+}
+
 
 #[cfg(test)]
 mod utils_tests {
